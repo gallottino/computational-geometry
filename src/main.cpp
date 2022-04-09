@@ -4,6 +4,27 @@
 
 using namespace ComputationalGeometry;
 
+#define GRID_DIM 40.f
+
+void drawGrid(sf::RenderWindow& window)
+{
+    for(int i = 0; i < 20; i++)
+    {
+        sf::Vertex line[2];
+        line[0] = sf::Vertex(sf::Vector2f((float) i * GRID_DIM, 0.f));
+        line[1] = sf::Vertex(sf::Vector2f((float) i * GRID_DIM, 800.f));
+        line[0].color = sf::Color(200.f,200.f,200.f);
+        line[1].color = sf::Color(200.f,200.f,200.f);
+
+        window.draw(line, 2, sf::Lines);
+
+        line[0] = sf::Vertex(sf::Vector2f(0.f, (float) i * GRID_DIM));
+        line[1] = sf::Vertex(sf::Vector2f(800.f,(float) i * GRID_DIM));
+        line[0].color = sf::Color(200.f,200.f,200.f);
+        line[1].color = sf::Color(200.f,200.f,200.f);
+        window.draw(line, 2, sf::Lines);
+    }
+}
 int main()
 {
     std::vector<Point*> points;
@@ -47,7 +68,7 @@ int main()
         }
 
         window.clear(sf::Color::White);
-
+        drawGrid(window);
         if(algo != NULL){
             for(int i = 1; i < algo->convexHullUpper.size(); i++) {
                 sf::Vertex line[2];
@@ -62,7 +83,6 @@ int main()
                 sf::Vertex line[2];
                 line[0] = algo->convexHullLower[i]->getCenter();
                 line[1] = algo->convexHullLower[i - 1]->getCenter();
-                
                 
                 line[0].color = sf::Color::Black;
                 line[1].color = sf::Color::Black;

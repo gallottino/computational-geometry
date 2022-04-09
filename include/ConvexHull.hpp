@@ -54,17 +54,9 @@ namespace ComputationalGeometry
         }
 
         bool makeRightTurn(Point* first, Point* middle, Point* top){
-            int direction = first->x - top->x > 0 ? 1 : -1;
-            int firstTurn = first->y - middle->y > 0? 1 : -1;
-            int lastTurn = middle->y - top->y > 0 ? 1 : -1;
-            bool res = false;
-
-            if(direction == 1){
-                return firstTurn == 1 && lastTurn == -1;
-            }
-            else{
-                return firstTurn == -1 && lastTurn == 1;
-            }
+            float m_1 = (middle->y - first->y) / (middle->x - first->x);
+            float m_2 = (top->y - middle->y) / (top->x - middle->x);
+            return m_2 < m_1;
         }
 
     };
