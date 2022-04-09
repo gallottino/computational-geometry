@@ -13,16 +13,24 @@ namespace ComputationalGeometry
         std::vector<Point*> convexHullUpper;
         std::vector<Point*> convexHullLower;
 
-        MonotoneConvexHull(std::vector<Point*> points) : set(points){
-            init();
+        MonotoneConvexHull(){
+            index = -1;
         }
 
         void init(){
-            upper = true;
+            resetConvexHull();
+
             sort(set.begin(), set.end(), Point::comparePoint);
             convexHullUpper.push_back(set[0]);
             convexHullUpper.push_back(set[1]);
             index = 2;
+        }
+
+        void resetConvexHull() {
+            index = -1;
+            upper = true;
+            convexHullLower.clear();
+            convexHullUpper.clear();
         }
 
         void step(){
@@ -53,11 +61,33 @@ namespace ComputationalGeometry
             }
         }
 
-        bool makeRightTurn(Point* first, Point* middle, Point* top){
-            float m_1 = (middle->y - first->y) / (middle->x - first->x);
-            float m_2 = (top->y - middle->y) / (top->x - middle->x);
-            return m_2 < m_1;
+        bool makeRightTurn(Point* first, Point* middle, Point* top) {
+            return (middle->y - first->y) * (top->x - middle->x) - (middle->x - first->x) * (top->y - middle->y) > 0;
         }
 
+        void render(sf::RenderWindow& window) {
+            for(int i = 1; i < convexHullUpper.size(); i++) {
+                sf::Vertex line[2];
+                line[0] = convexHullUpper[i]->getCenter();
+                line[1] = convexHullUpper[i - 1]->getCenter();
+                line[0].color = sf::Color::Black;
+                line[1].color = sf::Color::Black;
+
+                window.draw(line, 2, sf::Lines);
+            }
+            for(int i = 1; i < convexHullLower.size(); i++) {
+                sf::Vertex line[2];
+                line[0] = convexHullLower[i]->getCenter();
+                line[1] = convexHullLower[i - 1]->getCenter();
+                
+                line[0].color = sf::Color::Black;
+                line[1].color = sf::Color::Black;
+                window.draw(line, 2, sf::Lines);
+            }
+
+            for(int i = 0; i < set.size(); i++) {
+                set[i]->render(window);
+            }
+        }
     };
 }

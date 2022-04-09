@@ -4,7 +4,7 @@ project(Computational_Geometry)
 set(CMAKE_CXX_STANDARD 14)
 
 set(SOURCE_FILES
-        src/main.cpp
+        src/main.cpp 
 )
 
 set(HEADER_FILES

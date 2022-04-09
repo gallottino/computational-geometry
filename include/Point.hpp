@@ -28,7 +28,7 @@ namespace ComputationalGeometry{
             shape->setFillColor(sf::Color(rand()%256, rand()%256, rand()%256));
             shape->setOutlineColor(sf::Color::Black);
             shape->setOutlineThickness(1.f);
-            shape->move(x - radius,y - radius);
+            shape->move(x - 2 * radius,y - 2 * radius);
         }
 
         void render(sf::RenderWindow& window) const {
