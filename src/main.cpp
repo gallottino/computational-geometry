@@ -1,4 +1,5 @@
 #include <SFML/Graphics.hpp>
+#include <data_structures/avl.hpp>
 
 #include <geometry/Algorithms.h>
 #include <geometry/Geometry.h>
@@ -33,7 +34,7 @@ void drawGrid(sf::RenderWindow& window)
 }
 
 void drawPoint(sf::RenderWindow& window, Point2D p, sf::Color color){
-    float radius = 2.5f;
+    float radius = 3.f;
 
     if(p.null_value) return;
 
@@ -46,13 +47,37 @@ void drawPoint(sf::RenderWindow& window, Point2D p, sf::Color color){
     window.draw(shape);
 }
 
-void drawPoints(sf::RenderWindow& window, std::vector<std::shared_ptr<Point2D>> points)
-{   
-    float radius = 2.f;
+void drawOutlinePoint(sf::RenderWindow& window, Point2D p, sf::Color color){
+    float radius = 5.f;
 
-    for(std::shared_ptr<Point2D> p : points)
+    if(p.null_value) return;
+
+    sf::CircleShape shape;
+    shape.setRadius(radius);
+    shape.setFillColor(sf::Color::Transparent);
+    shape.setOutlineColor(color);
+    shape.setOutlineThickness(2.f);
+    shape.move(p.x - radius,p.y - radius);
+    window.draw(shape);
+}
+
+
+void drawHorizontalLine(sf::RenderWindow& window, Point2D point) {
+    sf::Vertex line[2];
+    line[0] = sf::Vertex(sf::Vector2f(0.f, point.y));
+    line[1] = sf::Vertex(sf::Vector2f(GRID_WIDTH, point.y));
+    line[0].color = sf::Color::Black;
+    line[1].color = sf::Color::Black;
+
+    window.draw(line, 2, sf::Lines);
+}
+
+void drawPoints(sf::RenderWindow& window, std::vector<Point2D> points)
+{   
+
+    for(Point2D p : points)
     {
-        drawPoint(window,*p, sf::Color::Black);
+        drawPoint(window,p, sf::Color::Black);
     }
 }
 
@@ -66,15 +91,15 @@ void drawSegment2D(sf::RenderWindow& window, Point2D start, Point2D end) {
         line[1].color = sf::Color::Black;
 
         window.draw(line,2,sf::Lines);
-        drawPoint(window, start, sf::Color::Red);
-        drawPoint(window, end, sf::Color::Red);
+        drawOutlinePoint(window, start, sf::Color::Red);
+        drawOutlinePoint(window, end, sf::Color::Red);
 }
 
-void drawConvexHull(sf::RenderWindow& window, std::vector<std::shared_ptr<Point2D>> convexHull)
+void drawConvexHull(sf::RenderWindow& window, std::vector<Point2D> convexHull)
 {
     for(int i = 1; i < convexHull.size(); i++) {
 
-        drawSegment2D(window, *(convexHull[i - 1]), *(convexHull[i]));
+        drawSegment2D(window, convexHull[i - 1], convexHull[i]);
     }
 }
 
@@ -89,17 +114,30 @@ void drawSegment2DCollision(sf::RenderWindow& window, std::vector<Segment2D> seg
     drawPoint(window, segments[0].intersectSegment2D(segments[0],segments[1]), sf::Color::Blue);
 }
 
-int main()
-{   
-    std::vector<std::shared_ptr<Point2D>> convexHull;
-    std::vector<std::shared_ptr<Point2D>> points;
+int main() {   
+    std::vector<Point2D> points;
     sf::RenderWindow window(sf::VideoMode(800, 600), "SFML works!");
     
+    AVL<int> status;
+    status.insertNode(1);
+    status.insertNode(10);
+    status.insertNode(40);
+    status.insertNode(15);
+    status.insertNode(2);
+    status.insertNode(7);
+    status.insertNode(12);
+    status.insertNode(4);
+    status.insertNode(24);
+    status.insertNode(13);
 
-    std::vector<Segment2D> segments = randomVectorSegment2D(2);
+    status.removeNode(12);
 
-    geometry::algorithm::PlaneSweep::calculate(segments);
+    status.printLeftOrder();
 
+    std::vector<Segment2D> segments = randomVectorSegment2D(10);
+    geometry::algorithm::PlaneSweep planeSweep(segments);
+    geometry::algorithm::MonotoneConvexHull convexHullAlgo;
+    sf::Clock clock;
     while (window.isOpen())
     {
         sf::Event event;
@@ -114,31 +152,41 @@ int main()
                 case sf::Event::MouseButtonPressed:
                 if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
                     sf::Vector2i position = sf::Mouse::getPosition(window);
-                    points.push_back(std::make_shared<Point2D>(Point2D(position.x,position.y)));
+                    points.push_back(Point2D(position.x,position.y));
                 }
                 break;
 
                 case::sf::Event::KeyPressed:
                     
                     if(event.key.code == sf::Keyboard::S){
-                        convexHull.clear();
-                        convexHull = geometry::algorithm::MonotoneConvexHull::calculate(points);
+                        convexHullAlgo.resetPoints(points);
                     }
                     if(event.key.code == sf::Keyboard::R) {
                         segments = randomVectorSegment2D(10);
                     }
                 break;
-
             }
-
         }
 
         window.clear(sf::Color::White);
         drawGrid(window);
         drawPoints(window, points);
+
+        drawConvexHull(window, convexHullAlgo.convexHull);
+        
+        if(clock.getElapsedTime().asMilliseconds() > 100) {
+            convexHullAlgo.calculate();
+            clock.restart();
+        }
+
         drawSegments2D(window,segments);
-        drawConvexHull(window, convexHull);
-        drawSegment2DCollision(window,segments);
+        drawHorizontalLine(window,planeSweep.plane);
+        if(clock.getElapsedTime().asMilliseconds() > 500) {
+           planeSweep.calculate();
+            clock.restart();
+        }
+
+
         window.display();
     }
 

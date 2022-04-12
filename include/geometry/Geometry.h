@@ -71,6 +71,7 @@ namespace geometry{
             double A1 = s1.end.y - s1.start.y;
             double B1 = s1.start.x - s1.end.x;
             double C1 = A1 * s1.start.x + B1 * s1.start.y;
+            
             double A2 = s2.end.y - s2.start.y;
             double B2 = s2.start.x - s2.end.x;
             double C2 = A2 * s2.start.x + B2 * s2.start.y;
