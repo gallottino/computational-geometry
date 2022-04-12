@@ -10,21 +10,6 @@
 
 namespace geometry {
 
-    static bool compareSharedPoint2D(std::shared_ptr<Point2D> p1, std::shared_ptr<Point2D>  p2){   
-        return p1->x == p2->x ? p1->y < p2->y : p1->x < p2->x;
-    }
-
-    static bool comparePoint2D(Point2D p1, Point2D  p2){   
-        return p1.x == p2.x ? p1.y < p2.y : p1.x < p2.x;
-    }
-    
-    static bool Point2dInSegment2D(Point2D p, Segment2D seg) {
-        if(p.x < seg.start.x || p.x > seg.end.x) return false;
-        if(p.y < seg.start.y || p.y > seg.end.y) return false;
-
-
-    }
-
     namespace algorithm {
         
         /***
@@ -32,11 +17,15 @@ namespace geometry {
          **/
         class MonotoneConvexHull {
             public:
+            
             static std::vector<std::shared_ptr<Point2D>> calculate(std::vector<std::shared_ptr<Point2D>> points) {   
                 
+                auto comparePoint2D = [] (std::shared_ptr<Point2D> p1, std::shared_ptr<Point2D>  p2) 
+                    -> bool {return p1->x == p2->x ? p1->y < p2->y : p1->x < p2->x;};
+
                 if(points.size() < 3) return points;
                 std::vector<std::shared_ptr<Point2D>> convexHull;
-                std::sort(points.begin(), points.end(), compareSharedPoint2D);
+                std::sort(points.begin(), points.end(), comparePoint2D);
 
                 int n_points = points.size();
                 convexHull.push_back(points[0]);
@@ -58,21 +47,13 @@ namespace geometry {
             ) {
                 int offset = lower > upper ? -1 : 1;
                 for(int i = lower; i * offset <= upper; i+=offset) {
+
                     int convexHullSize = convexHull.size();
-                
-                    std::shared_ptr<Point2D> first = convexHull[convexHullSize - 2];
-                    std::shared_ptr<Point2D> middle = convexHull[convexHullSize - 1];
-                    std::shared_ptr<Point2D> last = points[i];
- 
-                    while(makeRightTurn(first, middle , last)) {
+                    while(convexHullSize > 1 && makeRightTurn(convexHull[convexHullSize - 2], convexHull[convexHullSize - 1] , points[i])) {
                         convexHull.pop_back();
                         convexHullSize = convexHull.size();
-                        if(convexHullSize < 2) break;
-
-                        first = convexHull[convexHullSize - 2];
-                        middle = convexHull[convexHullSize - 1];  
                     }
-                    convexHull.push_back(last);     
+                    convexHull.push_back(points[i]);     
                 }
 
                 return convexHull;
@@ -89,50 +70,106 @@ namespace geometry {
          * Plane Sweep Algorithm is described in Chapter 2.1 of the book "Computational Geometry" by Mark de Berg
          **/
         class PlaneSweep{
-            
-            typedef struct {
-                Point2D p;
-                std::vector<Segment2D> segments;
-            }event_t;        
 
-            static void calculate(std::vector<std::shared_ptr<Segment2D>> segments) {
-                
-                std::set<Point2D, bool (*) (Point2D,Point2D)> event_queue(comparePoint2D);
-                std::set<Segment2D, bool (*) (Segment2D,Segment2D)> status;
+            public:
 
-                for(std::shared_ptr<Segment2D> seg : segments) {
-                    event_queue.insert(seg->start);
-                    event_queue.insert(seg->end);
+            class Event_Queue{
+                public:
+                std::set<Point2D> queue;
+                std::map<Point2D, std::vector<Segment2D>> L;
+                std::map<Point2D, std::vector<Segment2D>> U;
+                std::map<Point2D, std::vector<Segment2D>> C;
+
+                void addUpperPoint(Point2D p, Segment2D s) {
+                    auto ptr = queue.find(p);
+                    if(ptr == queue.end()){
+                        queue.insert(p);
+                    }
+
+                    U[p].push_back(s);
                 }
-                while(event_queue.size() > 0){
-                    Point2D p = *event_queue.begin();
-                    event_queue.erase(event_queue.begin());
-                    //handleEventPoint(p, status);
+
+                void addLowerPoint(Point2D p, Segment2D s) {
+                    auto ptr = queue.find(p);
+                    if(ptr == queue.end()){
+                        queue.insert(p);
+                    }
+
+                    L[p].push_back(s);
+                }
+
+                void addContainsPoint(Point2D p, Segment2D s1, Segment2D s2) {
+                    auto ptr = queue.find(p);
+                    if(ptr == queue.end()){
+                        queue.insert(p);
+                    }
+
+                    C[p].push_back(s1);
+                    C[p].push_back(s2);
+                }
+
+                Point2D pop() {
+                    Point2D p = *(--queue.end());
+                    queue.erase(--queue.end());
+                    return p;
+                }
+
+                int getSize() const  {return queue.size();}
+            };
+
+            class Status_Tree {
+                struct node{
+                    Segment2D seg;
+                    struct node* left;
+                    struct node* right;
+                };
+
+                struct node* root;
+
+                Status_Tree() {
+                    root = NULL;
+                }
+
+                void insertStatus(Segment2D seg) {
+
+                }
+
+                void deleteStatus(Segment2D seg) {
+
+                }
+
+                void swapStatus(Segment2D seg) {
+
+                }
+            };
+
+
+            static void calculate(std::vector<Segment2D> segments) {
+                
+                Event_Queue queue;
+
+                for(Segment2D seg : segments) {
+                    queue.addUpperPoint(seg.start, seg);
+                    queue.addLowerPoint(seg.end, seg);
+                }
+
+                //queue.addContainsPoint()
+                while(queue.getSize() > 0){
+                    Point2D next = queue.pop();
+                    handleEventPoint(next, &queue);
                 }
             }
 
-            /***
-             * L(p) = set of segments whose upper endpoint is p;
-             * U(p) = set of segments whose lower endpoint is p;
-             * C(p) = set of segments whose contains p;
-             * ***/
-            static void handleEventPoint(event_t event, std::set<Segment2D, bool (*) (Segment2D,Segment2D)> status) {
-                std::vector<Segment2D> L_p;
-                std::vector<Segment2D> U_p;
-                std::vector<Segment2D> C_p;
+            static void handleEventPoint(Point2D event, Event_Queue* queue) {
 
-                for(Segment2D seg : status) {
-                    if(event.p == seg.start) L_p.push_back(seg);
-                    if(event.p == seg.end) U_p.push_back(seg);
-
-                }
-                
-                int siz = L_p.size() + U_p.size() + C_p.size();
             }
 
-            static void findNewEvent(Segment2D sl, Segment2D sr, Point2D p)
-            {
-
+            static Point2D findNewEvent(Segment2D sl, Segment2D sr, Point2D p, Event_Queue* queue)
+            {   
+                Point2D intersectPoint = sl.intersectSegment2D(sl,sr);
+                if(!intersectPoint.null_value && intersectPoint.y < p.y){
+                    queue->addContainsPoint(intersectPoint,sl,sr);
+                }
             }
         };
     };
