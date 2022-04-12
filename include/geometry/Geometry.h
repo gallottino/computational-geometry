@@ -39,6 +39,10 @@ namespace geometry{
             return x == p.x && y == p.y;
         }
 
+        bool operator!=(const Point2D p) const {
+            return x != p.x || y != p.y;
+        }
+
         bool operator<(const Point2D p) const {
             return y == p.y ? x < p.x : y < p.y;
         }
@@ -103,4 +107,9 @@ namespace geometry{
         }
 
     };
+    
+    std::ostream& operator<<(std::ostream& output, Segment2D& s) {
+        output << s.start.toString() << "->" << s.end.toString();
+        return output;
+    }
 }

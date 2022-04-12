@@ -144,6 +144,9 @@ int main() {
                         segments = randomVectorSegment2D(10, 0, GRID_WIDTH);
                         planeSweep.init(segments);
                     }
+                    if(event.key.code == sf::Keyboard::N) {
+                        planeSweep.calculate();
+                    }
                 break;
             }
         }
@@ -154,19 +157,14 @@ int main() {
 
         drawConvexHull(window, convexHullAlgo.convexHull);
         
-        /**
         if(clock.getElapsedTime().asMilliseconds() > 100) {
-            convexHullAlgo.calculate();
+            //planeSweep.calculate();
             clock.restart();
-        } **/
+        } 
 
         drawSegments2D(window,segments);
         drawPoints(window, planeSweep.intersectPoints, sf::Color::Red);
         drawHorizontalLine(window,planeSweep.eventPoint);
-        if(clock.getElapsedTime().asMilliseconds() > 100) {
-            planeSweep.calculate();
-            clock.restart();
-        }
 
         window.display();
     }

@@ -80,7 +80,8 @@ namespace geometry {
             Point2D eventPoint;
             AVL<Point2D> queue;
             AVL<Segment2D> status;
-
+            
+            std::map<Point2D, std::vector<Segment2D>> U;
             std::vector<Point2D> intersectPoints;
 
             PlaneSweep(std::vector<Segment2D> segments) {
@@ -88,12 +89,13 @@ namespace geometry {
             }
 
             void init(std::vector<Segment2D> segments) {
+                intersectPoints.clear();
+                U.clear();
                 for(Segment2D seg : segments) {
                     queue.insertNode(seg.start);
+                    U[seg.start].push_back(seg);
                     queue.insertNode(seg.end);
                 }
-
-                queue.printInOrder();
             }
 
             void calculate() {  
@@ -101,6 +103,8 @@ namespace geometry {
                     eventPoint = queue.pop();
                     handleEventPoint(eventPoint);
                 }
+
+                //queue.printInOrder();
             }
             
             void handleEventPoint(Point2D event) {
@@ -109,23 +113,15 @@ namespace geometry {
                 status.toArray(&neighbors);
 
                 std::vector<Segment2D> L;
-                std::vector<Segment2D> U;
                 std::vector<Segment2D> C;
 
                 for(int i = 0; i < neighbors.size(); i++) {
-                    if(neighbors[i].onSegment(event)) {
-                        C.push_back(neighbors[i]);
-                    }
-                    if(neighbors[i].start == event) {
-                        U.push_back(neighbors[i]);
-                    }
                     if(neighbors[i].end == event) {
                         L.push_back(neighbors[i]);
                     }
-                }
-
-                if(L.size() + C.size() + U.size() > 0) {
-                    intersectPoints.push_back(event);
+                    else if(neighbors[i].start != event && neighbors[i].onSegment(event)) {
+                        C.push_back(neighbors[i]);
+                    }
                 }
 
                 for(int i =  0; i < L.size(); i++) {
@@ -143,25 +139,33 @@ namespace geometry {
                     status.insertNode(reverse);
                 }
 
-                for(int i =  0; i < U.size(); i++) {
-                    status.insertNode(U[i]);
+                for(int i =  0; i < U[event].size(); i++) {
+                    status.insertNode(U[event][i]);
                 }
 
-
-                if(U.size() + C.size() == 0){
-                    for(int i = 1; i < neighbors.size(); i++) {
-                        findNewEvent(neighbors[i - 1], neighbors[i], event);
-                    }
+                neighbors.clear();
+                status.toArray(&neighbors);
+                int status_size = neighbors.size();
+                if(U.size() + C.size() == 0) {
+                    if(status_size < 2) return;
+                    findNewEvent(neighbors[status_size / 2], neighbors[status_size / 2 + 1], event);
                 } else {
-
+                    if(status_size < 2) return;
+                    
+                    findNewEvent(neighbors[0] , neighbors[1], event);
+                    findNewEvent(neighbors[status_size - 1] , neighbors[status_size - 2], event);
                 }
+                std::cout << "-------------------------" << std::endl;
+                //status.printInOrder();
             }
 
             Point2D findNewEvent(Segment2D sl, Segment2D sr, Point2D p) {   
                 Point2D intersectPoint = sl.intersectSegment2D(sl,sr);
 
-                if(!intersectPoint.null_value && intersectPoint.y < p.y){
+                std::cout << "INTERSECTION TEST: " << sl << " with " << sr << std::endl;
+                if(!intersectPoint.null_value && intersectPoint.y > p.y){
                     queue.insertNode(intersectPoint);
+                    intersectPoints.push_back(intersectPoint);
                 }
             }
         };
