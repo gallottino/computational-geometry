@@ -1,5 +1,6 @@
 #pragma once
 #include <algorithm>
+#include <iostream>
 #include <list>
 #include <math.h>
 #include <string>
@@ -42,10 +43,17 @@ namespace geometry{
             return y == p.y ? x < p.x : y < p.y;
         }
 
-        bool operator<(const Point2D* p) const {
-            return y == p->y ? x < p->x : y < p->y;
+        bool operator>(const Point2D p) const {
+            return y == p.y ? x > p.x : y > p.y;
         }
+
+
     };
+
+    std::ostream& operator<<(std::ostream& output, Point2D& p) {
+        output << p.toString();
+        return output;
+    }
 
     class Segment2D{
         public:
@@ -58,20 +66,24 @@ namespace geometry{
             return start == p.start ? end < p.end : start < p.start;
         }
 
-        bool operator<(const Segment2D* p) const {
-            return start == p->start ? end < p->end : start < p->start;
+        bool operator>(const Segment2D p) const {
+            return start == p.start ? end > p.end : start > p.start;
         }
 
         bool onSegment(Point2D p) {
            return p.x <= std::max(start.x, end.x) && p.x >= std::min(start.x, end.x) &&
                 p.y <= std::max(start.y, end.y) && p.y >= std::min(start.y, end.y);
         }
+        
+        bool operator==(Segment2D s) {
+            return (start == s.start && end == s.end) || (start == s.end && end == s.start);
+        }
 
         Point2D intersectSegment2D(Segment2D s1, Segment2D s2) const {
             double A1 = s1.end.y - s1.start.y;
             double B1 = s1.start.x - s1.end.x;
             double C1 = A1 * s1.start.x + B1 * s1.start.y;
-            
+
             double A2 = s2.end.y - s2.start.y;
             double B2 = s2.start.x - s2.end.x;
             double C2 = A2 * s2.start.x + B2 * s2.start.y;

@@ -77,85 +77,91 @@ namespace geometry {
         class PlaneSweep{
 
             public:
+            Point2D eventPoint;
+            AVL<Point2D> queue;
+            AVL<Segment2D> status;
 
-            class Event_Queue{
-                public:
-                std::set<Point2D> queue;
+            std::vector<Point2D> intersectPoints;
 
-                void addEventPoint(Point2D p) {
-                    auto ptr = queue.find(p);
-                    if(ptr == queue.end()){
-                        queue.insert(p);
-                    }
+            PlaneSweep(std::vector<Segment2D> segments) {
+                init(segments);
+            }
+
+            void init(std::vector<Segment2D> segments) {
+                for(Segment2D seg : segments) {
+                    queue.insertNode(seg.start);
+                    queue.insertNode(seg.end);
                 }
 
-                Point2D pop() {
-                    Point2D p = *(queue.begin());
-                    queue.erase(queue.begin());
-                    return p;
+                queue.printInOrder();
+            }
+
+            void calculate() {  
+                if(queue.size() > 0){
+                    eventPoint = queue.pop();
+                    handleEventPoint(eventPoint);
                 }
+            }
+            
+            void handleEventPoint(Point2D event) {
 
-                int getSize() const  {return queue.size();}
-            };
-
-            class Status_Tree {
-                public:
-                struct node{
-                    Segment2D seg;
-                    struct node* left;
-                    struct node* right;
-                };
+                std::vector<Segment2D> neighbors;
+                status.toArray(&neighbors);
 
                 std::vector<Segment2D> L;
                 std::vector<Segment2D> U;
                 std::vector<Segment2D> C;
 
-                struct node* root;
-
-                Status_Tree() {
-                    root = NULL;
+                for(int i = 0; i < neighbors.size(); i++) {
+                    if(neighbors[i].onSegment(event)) {
+                        C.push_back(neighbors[i]);
+                    }
+                    if(neighbors[i].start == event) {
+                        U.push_back(neighbors[i]);
+                    }
+                    if(neighbors[i].end == event) {
+                        L.push_back(neighbors[i]);
+                    }
                 }
 
-                void insertStatus(Segment2D seg) {
-
+                if(L.size() + C.size() + U.size() > 0) {
+                    intersectPoints.push_back(event);
                 }
 
-                void deleteStatus(Segment2D seg) {
-                    
+                for(int i =  0; i < L.size(); i++) {
+                    status.removeNode(L[i]);
                 }
 
-                void swapStatus(Segment2D seg) {
+                for(int i = 0; i < C.size(); i++) {
+                    status.removeNode(C[i]);
 
+                    Segment2D reverse = C[i];
+                    Point2D tmp = reverse.start;
+                    reverse.start = reverse.end;
+                    reverse.end = tmp; 
+
+                    status.insertNode(reverse);
                 }
-            };
 
-            Point2D plane;
-            Event_Queue queue;
+                for(int i =  0; i < U.size(); i++) {
+                    status.insertNode(U[i]);
+                }
 
-            PlaneSweep(std::vector<Segment2D> segments) {
-                for(Segment2D seg : segments) {
-                    queue.addEventPoint(seg.start);
-                    queue.addEventPoint(seg.end);
+
+                if(U.size() + C.size() == 0){
+                    for(int i = 1; i < neighbors.size(); i++) {
+                        findNewEvent(neighbors[i - 1], neighbors[i], event);
+                    }
+                } else {
+
                 }
             }
 
-            void calculate() {  
-                if(queue.getSize() > 0){
-                    plane = queue.pop();
-                    handleEventPoint(plane, &queue);
-                }
-            }
-
-            static void handleEventPoint(Point2D event, Event_Queue* queue) {
-                
-
-            }
-
-            static Point2D findNewEvent(Segment2D sl, Segment2D sr, Point2D p, Event_Queue* queue)
-            {   
+            Point2D findNewEvent(Segment2D sl, Segment2D sr, Point2D p) {   
                 Point2D intersectPoint = sl.intersectSegment2D(sl,sr);
+
                 if(!intersectPoint.null_value && intersectPoint.y < p.y){
-                    queue->addEventPoint(intersectPoint);
+                    queue.insertNode(intersectPoint);
                 }
             }
         };

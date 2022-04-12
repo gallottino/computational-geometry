@@ -6,20 +6,24 @@
 template<class T>
 class AVL {
 
-struct node {
-    T value;
-    int height;
+protected:
+    struct node {
+        T value;
+        int height;
 
-    struct node* left;
-    struct node* right;
+        struct node* left;
+        struct node* right;
 
-    node(T v) : value(v), left(NULL), right(NULL), height(1) {}
-};
-
-private:
+        node(T v) : value(v), left(NULL), right(NULL), height(1) {}
+    };
     struct node* root = NULL;
-
 public:
+
+    int size() {
+        if(root == NULL) return 0;
+        return root->height;
+    }
+
     int getHeight(struct node* node) {
         if(node ==  NULL) return 0;
 
@@ -33,65 +37,102 @@ public:
     }
 
     struct node* leftRotate(struct node* node) {
-        struct node* right_node = node->right;
 
-        node->right = right_node->left;
-        right_node->left = node;
+        struct node* to_swap = node->right;
+        struct node* to_swap_left = to_swap->left;
 
+        to_swap->left = node;
+        node->right = to_swap_left;
+        
         node->height = std::max(getHeight(node->left),   
                     getHeight(node->right)) + 1;
 
-        right_node->height = std::max(getHeight(right_node->left),
-                    getHeight(right_node->right)) + 1;
+        to_swap->height = std::max(getHeight(to_swap->left),
+                    getHeight(to_swap->right)) + 1;
 
-        return right_node;
+        return to_swap;
     }
 
     struct node* rightRotate(struct node* node) {
-        struct node* left_node = node->left;
 
-        node->left = left_node->right;
-        left_node->right = node;
+        struct node* to_swap = node->left;
+        struct node* to_swap_right = to_swap->right;
+
+        to_swap->right = node;
+        node->left = to_swap_right;
 
         node->height = std::max(getHeight(node->left),   
                     getHeight(node->right)) + 1;
 
-        left_node->height = std::max(getHeight(left_node->left),
-                    getHeight(left_node->right)) + 1;
+        to_swap->height = std::max(getHeight(to_swap->left),
+                    getHeight(to_swap->right)) + 1;
 
-        return left_node;
+        return to_swap;
     }
 
-    void printLeftOrder() {
-        printLeft(root);
+    void printInOrder() {
+        print(root);
     }
 
-    void printLeft(struct node* node) {
+    void print(struct node* node) {
         if(node == NULL) return;
 
-        printLeft(node->left);
+        print(node->left);
         std::cout << node->value << std::endl;
-        printLeft(node->right);
+        print(node->right);
     }
     
     void insertNode(T value) {
-        std::cout << "Inserting " << value << "..." << std::endl; 
         root = insert(root, value);
+    }
 
-        std::cout <<"Correctly inserted." << std::endl;
+    T getLeftMostValue() {
+        struct node* current = root;
+  
+        while(current->left != NULL) {
+            current = current->left;
+        }
+
+        return current->value;
+    }
+
+    void toArray(std::vector<T>* res) {
+        toArrayNode(root, res);
+    }   
+
+    void toArrayNode(struct node* node, std::vector<T>* res) {
+        if(node == NULL) return;
+
+        toArrayNode(node->left, res);
+        res->push_back(node->value);
+        toArrayNode(node->right, res);
+    }
+
+    T getRightMostValue() {
+        struct node* current = root;
+
+        while(current->right != NULL) {
+            current = current->right;
+        } 
+        return current->value;
     }
 
     struct node* getLeftMost(struct node* node) {
         struct node* current = node;
+  
+        while(current->left != NULL) {
+            current = current->left;
+        }
 
-        while(current != NULL) current = node->left;
         return current;
     }
 
     struct node* getRightMost(struct node* node) {
         struct node* current = node;
 
-        while(current != NULL) current = node->right;
+        while(current->right != NULL) {
+            current = current->right;
+        } 
         return current;
     }
 
@@ -104,13 +145,12 @@ public:
         else if(value > node->value) {
             node->right = insert(node->right, value);
         }
+        else {
+            return node;
+        }
 
         node->height = 1 + std::max(getHeight(node->left), getHeight(node->right));
 
-        return balanceTree(node, value);
-    }
-
-    struct node* balanceTree(struct node* node, T value) {
         int balance = getBalance(node);
 
         // Left Left Case
@@ -136,6 +176,13 @@ public:
         return node;
     }
 
+
+    T pop() {
+        T to_pop = getLeftMost(root)->value;
+        removeNode(to_pop);
+        return to_pop;
+    }
+
     void removeNode(T value) {
         root = remove(root, value);
     }
@@ -143,15 +190,14 @@ public:
     struct node* remove(struct node* node, T value) {
         if(node == NULL) return node;
 
-        if(value < node-> value) {
-            remove(node->left, value);
+        if(value < node->value) {
+            node->left = remove(node->left, value);
         }
         else if( value > node->value) {
-            remove(node->right, value);
+            node->right = remove(node->right, value);
         }
         else { // value found
-            if( (node->left == NULL) ||
-                (node->right == NULL) ) {
+            if( (node->left == NULL) || (node->right == NULL) ) {
                 struct node* temp = node->left ?
                             node->left :
                             node->right;
@@ -160,15 +206,14 @@ public:
                     temp = node;
                     node = NULL;
                 }
-                else // One child case
-                    *node = *temp; // Copy the contents of
-                            // the non-empty child
+                else *node = *temp;
+
                 free(temp);
             }
             else {
                 struct node* temp = getLeftMost(root->right);
 
-                node->value = node->value;
+                node->value = temp->value;
                 node->right = remove(node->right, temp->value);
             }
         }
@@ -176,6 +221,28 @@ public:
         if(node == NULL) return node;
         node->height = 1 + std::max(getHeight(node->left), getHeight(node->right));
         
-        return balanceTree(node, value);
+        int balance = getBalance(node);
+ 
+        // Left Left Case
+        if (balance > 1 && getBalance(node->left) >= 0)
+            return rightRotate(node);
+
+        // Left Right Case
+        if (balance > 1 && getBalance(node->left) < 0) {
+            node->left = leftRotate(node->left);
+            return rightRotate(node);
+        }
+
+        // Right Right Case
+        if (balance < -1 && getBalance(node->right) <= 0)
+            return leftRotate(node);
+
+        // Right Left Case
+        if (balance < -1 && getBalance(node->right) > 0) {
+            node->right = rightRotate(node->right);
+            return leftRotate(node);
+        }
+
+        return node;
     }
 };

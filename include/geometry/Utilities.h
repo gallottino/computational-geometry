@@ -43,16 +43,23 @@ namespace geometry {
         return segments;
     }
 
-    static std::vector<Segment2D> randomVectorSegment2D(int size) {
+    static std::vector<Segment2D> randomVectorSegment2D(int size, double lower, double upper) {
 
         std::vector<Segment2D> segments;
         for(int i = 0; i < size; i++){
-            double start_x = rand() % 600;
-            double start_y = rand() % 600;
-            double end_x =  rand() % 600; 
-            double end_y = rand() % 600;
 
-            segments.push_back(Segment2D(Point2D(start_x,start_y),Point2D(end_x,end_y)));
+            double range = upper - lower;
+
+            double x_1 = (rand() % (int) range) + lower;
+            double y_1 = (rand() % (int) range) + lower;
+            double x_2 = (rand() % (int) range) + lower;
+            double y_2 = (rand() % (int) range) + lower;
+
+            Point2D p1 = Point2D(x_1, y_1);
+            Point2D p2 = Point2D(x_2, y_2);
+
+            Segment2D s = p1 < p2 ? Segment2D(p1,p2) : Segment2D(p2,p1);
+            segments.push_back(s);
         }
 
         return segments;
