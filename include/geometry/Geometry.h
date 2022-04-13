@@ -51,7 +51,9 @@ namespace geometry{
             return y == p.y ? x > p.x : y > p.y;
         }
 
-
+        double getDistance(Point2D p1, Point2D p2) {
+            return sqrt(pow(p2.x - p1.x , 2) +  pow(p2.y - p1.y,2));
+        }
     };
 
     std::ostream& operator<<(std::ostream& output, Point2D& p) {
@@ -67,16 +69,25 @@ namespace geometry{
         Segment2D(Point2D start, Point2D end) : start(start), end(end) {}
         
         bool operator<(const Segment2D p) const {
-            return start == p.start ? end < p.end : start < p.start;
+            return start.x == p.start.x ? start.y < p.start.y : start.x < p.start.x;
         }
 
         bool operator>(const Segment2D p) const {
-            return start == p.start ? end > p.end : start > p.start;
+            return start.x == p.start.x ? start.y > p.start.y : start.x > p.start.x;
         }
 
         bool onSegment(Point2D p) {
            return p.x <= std::max(start.x, end.x) && p.x >= std::min(start.x, end.x) &&
                 p.y <= std::max(start.y, end.y) && p.y >= std::min(start.y, end.y);
+        }
+
+        bool containsPoint(Point2D p) {
+            if(start == p || end == p) return false;
+            double a = p.getDistance(start,p);
+            double b = p.getDistance(end,p);
+            double c = p.getDistance(start,end);
+
+            return a + b == c;
         }
         
         bool operator==(Segment2D s) {
@@ -107,9 +118,43 @@ namespace geometry{
         }
 
     };
-    
+
     std::ostream& operator<<(std::ostream& output, Segment2D& s) {
         output << s.start.toString() << "->" << s.end.toString();
+        return output;
+    }
+
+    class Segment2DEvent {
+        public:
+        Segment2D seg;
+        bool reversed;
+
+        Segment2DEvent(Segment2D segment) : seg(segment) {}
+        bool operator<(Segment2DEvent segEvent) {             
+            Segment2D s1 = reversed ? Segment2D(seg.end, seg.start) : seg;
+            Segment2D s2 = segEvent.reversed ? Segment2D(segEvent.seg.end, segEvent.seg.start) : segEvent.seg;
+            return s1 < s2;
+        }
+
+        bool operator>(Segment2DEvent segEvent) {             
+            Segment2D s1 = reversed ? Segment2D(seg.end, seg.start) : seg;
+            Segment2D s2 = !segEvent.reversed ? Segment2D(segEvent.seg.end, segEvent.seg.start) : segEvent.seg;
+            return s1 > s2;
+        }
+
+        bool operator==(Segment2DEvent segEvent) {             
+            Segment2D s1 = seg;
+            Segment2D s2 = segEvent.seg;
+            return s1 == s2;
+        }
+    };   
+
+    std::ostream& operator<<(std::ostream& output, Segment2DEvent& s) {
+        if(!s.reversed)
+            output << s.seg.start.toString() << "----" << s.seg.end.toString();
+        else {
+            output << s.seg.end.toString() << "----" << s.seg.start.toString() << "  reversed!";
+        }
         return output;
     }
 }

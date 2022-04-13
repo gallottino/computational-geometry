@@ -19,6 +19,7 @@ protected:
     struct node* root = NULL;
 public:
 
+    AVL(){}
     int size() {
         if(root == NULL) return 0;
         return root->height;
@@ -86,15 +87,11 @@ public:
         root = insert(root, value);
     }
 
-    T getLeftMostValue() {
-        struct node* current = root;
-  
-        while(current->left != NULL) {
-            current = current->left;
-        }
+    T getLeftMostValue(T value) {
 
-        return current->value;
+        return value;
     }
+
 
     void toArray(std::vector<T>* res) {
         toArrayNode(root, res);
@@ -108,16 +105,16 @@ public:
         toArrayNode(node->right, res);
     }
 
-    T getRightMostValue() {
-        struct node* current = root;
+    struct node* getMaxNode(struct node* node) {
+        struct node* current = node;
 
         while(current->right != NULL) {
             current = current->right;
         } 
-        return current->value;
+        return current;
     }
 
-    struct node* getLeftMost(struct node* node) {
+    struct node* getMinNode(struct node* node) {
         struct node* current = node;
   
         while(current->left != NULL) {
@@ -127,27 +124,19 @@ public:
         return current;
     }
 
-    struct node* getRightMost(struct node* node) {
-        struct node* current = node;
-
-        while(current->right != NULL) {
-            current = current->right;
-        } 
-        return current;
-    }
-
     struct node* insert(struct node* node, T value) {
         if(node == NULL) return new struct node(value);
         
-        if(value < node->value) {
+        if(value == node->value) {
+            return node;
+        }
+        else if(value < node->value) {
             node->left = insert(node->left, value);
         }
         else if(value > node->value) {
             node->right = insert(node->right, value);
         }
-        else {
-            return node;
-        }
+
 
         node->height = 1 + std::max(getHeight(node->left), getHeight(node->right));
 
@@ -176,9 +165,8 @@ public:
         return node;
     }
 
-
     T pop() {
-        T to_pop = getLeftMost(root)->value;
+        T to_pop = getMinNode(root)->value;
         removeNode(to_pop);
         return to_pop;
     }
@@ -190,13 +178,7 @@ public:
     struct node* remove(struct node* node, T value) {
         if(node == NULL) return node;
 
-        if(value < node->value) {
-            node->left = remove(node->left, value);
-        }
-        else if( value > node->value) {
-            node->right = remove(node->right, value);
-        }
-        else { // value found
+        if(value == node->value) { // value found
             if( (node->left == NULL) || (node->right == NULL) ) {
                 struct node* temp = node->left ?
                             node->left :
@@ -211,11 +193,17 @@ public:
                 free(temp);
             }
             else {
-                struct node* temp = getLeftMost(root->right);
+                struct node* temp = getMinNode(node->right);
 
                 node->value = temp->value;
                 node->right = remove(node->right, temp->value);
             }
+        }
+        else if(value < node->value) {
+            node->left = remove(node->left, value);
+        }
+        else if( value > node->value) {
+            node->right = remove(node->right, value);
         }
 
         if(node == NULL) return node;

@@ -74,6 +74,7 @@ namespace geometry {
         /***
          * Plane Sweep Algorithm is described in Chapter 2.1 of the book "Computational Geometry" by Mark de Berg
          **/
+
         class PlaneSweep{
 
             public:
@@ -82,6 +83,8 @@ namespace geometry {
             AVL<Segment2D> status;
             
             std::map<Point2D, std::vector<Segment2D>> U;
+            std::map<Point2D, std::vector<Segment2D>> C;
+            std::map<Point2D, std::vector<Segment2D>> L;
             std::vector<Point2D> intersectPoints;
 
             PlaneSweep(std::vector<Segment2D> segments) {
@@ -94,7 +97,9 @@ namespace geometry {
                 for(Segment2D seg : segments) {
                     queue.insertNode(seg.start);
                     U[seg.start].push_back(seg);
+
                     queue.insertNode(seg.end);
+                    L[seg.end].push_back(seg);
                 }
             }
 
@@ -112,51 +117,36 @@ namespace geometry {
                 std::vector<Segment2D> neighbors;
                 status.toArray(&neighbors);
 
-                std::vector<Segment2D> L;
-                std::vector<Segment2D> C;
-
-                for(int i = 0; i < neighbors.size(); i++) {
-                    if(neighbors[i].end == event) {
-                        L.push_back(neighbors[i]);
-                    }
-                    else if(neighbors[i].start != event && neighbors[i].onSegment(event)) {
-                        C.push_back(neighbors[i]);
-                    }
+                for(int i =  0; i < L[event].size(); i++) {
+                    status.removeNode(L[event][i]);
+                    std::cout << "Removing..." << std::endl;
                 }
 
-                for(int i =  0; i < L.size(); i++) {
-                    status.removeNode(L[i]);
-                }
+                for(int i = 0; i < C[event].size(); i++) {
+                    status.removeNode(C[event][i]);
 
-                for(int i = 0; i < C.size(); i++) {
-                    status.removeNode(C[i]);
-
-                    Segment2D reverse = C[i];
-                    Point2D tmp = reverse.start;
-                    reverse.start = reverse.end;
-                    reverse.end = tmp; 
-
-                    status.insertNode(reverse);
+                    std::cout << "Reversing" << std::endl;
+                    status.insertNode(C[event][i]);
                 }
 
                 for(int i =  0; i < U[event].size(); i++) {
                     status.insertNode(U[event][i]);
+                    std::cout << "Inserting..." << std::endl;
                 }
 
                 neighbors.clear();
                 status.toArray(&neighbors);
                 int status_size = neighbors.size();
+
                 if(U.size() + C.size() == 0) {
                     if(status_size < 2) return;
+
                     findNewEvent(neighbors[status_size / 2], neighbors[status_size / 2 + 1], event);
                 } else {
-                    if(status_size < 2) return;
                     
-                    findNewEvent(neighbors[0] , neighbors[1], event);
-                    findNewEvent(neighbors[status_size - 1] , neighbors[status_size - 2], event);
                 }
                 std::cout << "-------------------------" << std::endl;
-                //status.printInOrder();
+                status.printInOrder();
             }
 
             Point2D findNewEvent(Segment2D sl, Segment2D sr, Point2D p) {   
@@ -166,6 +156,8 @@ namespace geometry {
                 if(!intersectPoint.null_value && intersectPoint.y > p.y){
                     queue.insertNode(intersectPoint);
                     intersectPoints.push_back(intersectPoint);
+                    C[p].push_back(sl);
+                    C[p].push_back(sr);
                 }
             }
         };
