@@ -87,11 +87,35 @@ public:
         root = insert(root, value);
     }
 
-    T getLeftMostValue(T value) {
-
-        return value;
+    T getLeft(T value) {
+        return  getLeftNode(root, value)->value;
     }
 
+    struct node* getLeftNode(struct node* current, T value) {
+        if(current == NULL) return NULL;
+
+        struct node* res;
+        if( value < current->value) {
+            res = getLeftNode(current->left, value);
+        }
+        else if(value > current->value) {
+            res = getLeftNode(current->right, value);
+        }
+        return res;
+    }
+
+
+    void getRightNode(struct node* current, T value, struct node* returnNode) {
+        if(current == NULL) return;
+
+        if(value == current->value) return current->left;
+        else if( value < current->value) {
+            getLeftNode(current->left, value, returnNode);
+        }
+        else if(value > current->value) {
+            getLeftNode(current->right, value, returnNode);
+        }
+    }
 
     void toArray(std::vector<T>* res) {
         toArrayNode(root, res);
@@ -232,5 +256,19 @@ public:
         }
 
         return node;
+    }
+
+    void clear() {
+        clearNode(root);
+        root = NULL;
+    }
+
+    void clearNode(struct node* current) {
+
+        if(current == NULL) return;
+        clearNode(current->left);
+        clearNode(current->right);
+
+        free(current);
     }
 };

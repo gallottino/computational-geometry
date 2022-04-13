@@ -2,6 +2,7 @@
 #include <data_structures/avl.hpp>
 
 #include <geometry/Algorithms.h>
+#include <geometry/PlaneSweep.hpp>
 #include <geometry/Geometry.h>
 #include <geometry/Utilities.h>
 #include <memory>
@@ -112,21 +113,11 @@ int main() {
     std::vector<Point2D> points;
     sf::RenderWindow window(sf::VideoMode(800, 600), "SFML works!");
 
-    std::vector<Segment2D> segments = randomVectorSegment2D(14, 0, GRID_WIDTH);
-    geometry::algorithm::PlaneSweep planeSweep(segments);
+    std::vector<Segment2D> segments = randomVectorSegment2D(5, 0, GRID_WIDTH);
+    geometry::PlaneSweep planeSweep(segments);
     geometry::algorithm::MonotoneConvexHull convexHullAlgo;
 
-    AVL<Segment2D> test;
 
-    for(Segment2D seg : segments) {
-        test.insertNode(seg);
-    }
-
-    for(Segment2D seg : segments) {
-        test.removeNode(seg);
-    }
-
-    test.printInOrder();
     sf::Clock clock;
     while (window.isOpen())
     {
@@ -152,7 +143,7 @@ int main() {
                         convexHullAlgo.resetPoints(points);
                     }
                     if(event.key.code == sf::Keyboard::R) {
-                        segments = randomVectorSegment2D(10, 0, GRID_WIDTH);
+                        segments = randomVectorSegment2D(8, 0, GRID_WIDTH);
                         planeSweep.init(segments);
                     }
                     if(event.key.code == sf::Keyboard::N) {

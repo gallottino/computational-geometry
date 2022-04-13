@@ -42,6 +42,10 @@ namespace geometry{
         bool operator!=(const Point2D p) const {
             return x != p.x || y != p.y;
         }
+        Point2D& operator=(const Point2D& p) {
+            x = p.x;
+            y = p.y;
+        }
 
         bool operator<(const Point2D p) const {
             return y == p.y ? x < p.x : y < p.y;
@@ -66,8 +70,13 @@ namespace geometry{
         Point2D start;
         Point2D end;
 
+
         Segment2D(Point2D start, Point2D end) : start(start), end(end) {}
-        
+
+        Segment2D twin() {
+            return Segment2D(end,start);
+        }
+
         bool operator<(const Segment2D p) const {
             return start.x == p.start.x ? start.y < p.start.y : start.x < p.start.x;
         }
@@ -92,6 +101,15 @@ namespace geometry{
         
         bool operator==(Segment2D s) {
             return (start == s.start && end == s.end) || (start == s.end && end == s.start);
+        }
+
+        Segment2D operator=(const Segment2D& s) const {
+            Segment2D res(s.start,s.end);
+            return res;
+        }
+
+        bool operator!=(Segment2D s) {
+            return !(twin() == s);
         }
 
         Point2D intersectSegment2D(Segment2D s1, Segment2D s2) const {
@@ -126,20 +144,23 @@ namespace geometry{
 
     class Segment2DEvent {
         public:
+        Point2D eventPoint;
         Segment2D seg;
-        bool reversed;
 
-        Segment2DEvent(Segment2D segment) : seg(segment) {}
-        bool operator<(Segment2DEvent segEvent) {             
-            Segment2D s1 = reversed ? Segment2D(seg.end, seg.start) : seg;
-            Segment2D s2 = segEvent.reversed ? Segment2D(segEvent.seg.end, segEvent.seg.start) : segEvent.seg;
-            return s1 < s2;
+        Segment2DEvent(Segment2D segment, Point2D event) : seg(segment), eventPoint(event) { }
+
+        Segment2D getSweepLine(Point2D event) {
+            Point2D start(0,event.y);
+            Point2D end(1000, event.y);
+
+            return Segment2D(start,end);
         }
+        bool operator<(Segment2DEvent segEvent) {             
+            Point2D currentEvent =  segEvent.eventPoint.y > eventPoint.y ? segEvent.eventPoint : eventPoint;
 
-        bool operator>(Segment2DEvent segEvent) {             
-            Segment2D s1 = reversed ? Segment2D(seg.end, seg.start) : seg;
-            Segment2D s2 = !segEvent.reversed ? Segment2D(segEvent.seg.end, segEvent.seg.start) : segEvent.seg;
-            return s1 > s2;
+            Point2D intersectP = seg.intersectSegment2D(seg, getSweepLine(currentEvent));
+            Point2D intersectP2 = segEvent.seg.intersectSegment2D(segEvent.seg, getSweepLine(currentEvent));
+            return intersectP < intersectP2;
         }
 
         bool operator==(Segment2DEvent segEvent) {             
@@ -147,14 +168,21 @@ namespace geometry{
             Segment2D s2 = segEvent.seg;
             return s1 == s2;
         }
+
+        Segment2DEvent operator=(Segment2DEvent segEvent) {       
+            Segment2DEvent newSegEvent(segEvent.seg,segEvent.eventPoint);      
+        }
+
+        bool operator!=(Segment2DEvent segEvent) {             
+            Segment2D s1 = seg;
+            Segment2D s2 = segEvent.seg;
+            return s1 != s2;
+        }
+
     };   
 
     std::ostream& operator<<(std::ostream& output, Segment2DEvent& s) {
-        if(!s.reversed)
-            output << s.seg.start.toString() << "----" << s.seg.end.toString();
-        else {
-            output << s.seg.end.toString() << "----" << s.seg.start.toString() << "  reversed!";
-        }
+        output << s.seg.start.toString() << "----" << s.seg.end.toString();
         return output;
     }
 }
