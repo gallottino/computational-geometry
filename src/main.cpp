@@ -113,10 +113,17 @@ int main() {
     std::vector<Point2D> points;
     sf::RenderWindow window(sf::VideoMode(800, 600), "SFML works!");
 
-    std::vector<Segment2D> segments = randomVectorSegment2D(5, 0, GRID_WIDTH);
+    std::vector<Segment2D> segments = loadSegment2DFromFile("verify.txt");
     geometry::PlaneSweep planeSweep(segments);
     geometry::algorithm::MonotoneConvexHull convexHullAlgo;
 
+    // (100,329)->(408,366), (63,563) 
+    Point2D currentPoint(63,563);
+    Segment2D test(Point2D(100,329),Point2D(408,366));
+    Segment2D sweepLine(Segment2D(Point2D(0.0,currentPoint.y), Point2D(1000.0, currentPoint.y)));
+
+    Point2D res = Segment2D::intersectSegment2D(test,sweepLine);
+    std::cout << res << std::endl;
 
     sf::Clock clock;
     while (window.isOpen())
@@ -139,15 +146,21 @@ int main() {
 
                 case::sf::Event::KeyPressed:
                     
-                    if(event.key.code == sf::Keyboard::S){
+                    if(event.key.code == sf::Keyboard::S) {
                         convexHullAlgo.resetPoints(points);
                     }
+
                     if(event.key.code == sf::Keyboard::R) {
-                        segments = randomVectorSegment2D(8, 0, GRID_WIDTH);
+                        segments = randomVectorSegment2D(25, 0, GRID_WIDTH);
                         planeSweep.init(segments);
                     }
+
                     if(event.key.code == sf::Keyboard::N) {
                         planeSweep.calculate();
+                    }
+
+                    if(event.key.code == sf::Keyboard::S) {
+                        saveSegment2DonFile("verify.txt", segments);
                     }
                 break;
             }
@@ -160,12 +173,14 @@ int main() {
         drawConvexHull(window, convexHullAlgo.convexHull);
         
         if(clock.getElapsedTime().asMilliseconds() > 100) {
-            //planeSweep.calculate();
+            //convexHullAlgo.calculate();
             clock.restart();
         } 
-
+        
         drawSegments2D(window,segments);
+
         drawPoints(window, planeSweep.intersectPoints, sf::Color::Red);
+        planeSweep.drawIntersectionPoints(window);
         drawHorizontalLine(window,planeSweep.eventPoint);
 
         window.display();

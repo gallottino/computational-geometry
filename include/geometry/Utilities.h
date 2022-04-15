@@ -1,6 +1,7 @@
 #pragma once
 
 #include <geometry/Geometry.h>
+#include <ios>
 #include <fstream>
 #include <string>
 #include <time.h>
@@ -63,5 +64,15 @@ namespace geometry {
         }
 
         return segments;
+    }
+
+    static void saveSegment2DonFile(char * filename , std::vector<Segment2D> segments) {
+
+        std::ofstream out(filename, std::ios::trunc);
+        for(Segment2D s : segments) {
+            out << s.start.x << " " << s.start.y << " " << s.end.x << " " << s.end.y << std::endl;
+        }
+
+        out.close();
     }
 }
