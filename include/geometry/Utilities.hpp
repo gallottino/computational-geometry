@@ -1,6 +1,8 @@
 #pragma once
 
 #include <geometry/Geometry.hpp>
+#include <geometry/Polygon2D.hpp>
+
 #include <ios>
 #include <fstream>
 #include <string>
@@ -14,8 +16,7 @@ namespace geometry {
         std::ifstream file_in(filename);
 
         std::string line;
-        while(std::getline(file_in, line))
-        {
+        while(std::getline(file_in, line)) {
             std::stringstream iss(line);
             float x, y;
             if (!(iss >> x >> y)) { break; } 
@@ -31,8 +32,7 @@ namespace geometry {
         std::ifstream file_in(filename);
 
         std::string line;
-        while(std::getline(file_in, line))
-        {
+        while(std::getline(file_in, line)) {
             std::stringstream iss(line);
             double start_x, start_y;
             double end_x, end_y;
@@ -44,14 +44,14 @@ namespace geometry {
         return segments;
     }
 
-    static std::set<Point2D> randomSetPoint2D(int size, double lower, double upper) {
-        std::set<Point2D> points;
+    static std::vector<Point2D> randomSetPoint2D(int size, double lower, double upper) {
+        std::vector<Point2D> points;
 
         double range = upper - lower;
         for(int i = 0; i < size; i++) {
             int x  = (rand() % (int) range) + lower;
             int y  = (rand() % (int) range) + lower;
-            points.insert(Point2D(x,y));
+            points.push_back(Point2D(x,y));
         }
 
         return points;
@@ -60,7 +60,7 @@ namespace geometry {
     static std::vector<Segment2D> randomVectorSegment2D(int size, double lower, double upper) {
 
         std::vector<Segment2D> segments;
-        for(int i = 0; i < size; i++){
+        for(int i = 0; i < size; i++) {
 
             double range = upper - lower;
 
@@ -87,5 +87,11 @@ namespace geometry {
         }
 
         out.close();
+    }
+
+    static Polygon2D randomPolygon2D(int size, double lower, double upper) {
+        std::vector<Point2D> vertices = randomSetPoint2D(size,lower,upper);
+        Polygon2D polygon(vertices);
+        return polygon;
     }
 }

@@ -98,9 +98,30 @@ void drawSegment2DCollision(sf::RenderWindow& window, std::vector<Segment2D> seg
     drawPoint(window, segments[0].intersectSegment2D(segments[0],segments[1]), sf::Color::Blue);
 }
 
+void drawPolygon(sf::RenderWindow& window, std::vector<Point2D> points) {
+    
+    sf::Vertex line[2];
+    for(int i = 1; i < points.size(); i++) {
+        
+        line[0] = sf::Vertex(sf::Vector2f(points[i - 1].x, points[i - 1].y));
+        line[1] = sf::Vertex(sf::Vector2f(points[i].x, points[i].y));
+        line[0].color = sf::Color::Black;
+        line[1].color = sf::Color::Black;
+
+        window.draw(line, 2, sf::Lines);
+    }
+
+    if(points.size() < 3) return;
+    line[0] = sf::Vertex(sf::Vector2f(points[0].x, points[0].y));
+    line[1] = sf::Vertex(sf::Vector2f(points[points.size() - 1].x, points[points.size() - 1].y));
+    line[0].color = sf::Color::Black;
+    line[1].color = sf::Color::Black;
+    window.draw(line, 2, sf::Lines);
+}
+
 int main() {   
     std::vector<Point2D> points;
-    sf::RenderWindow window(sf::VideoMode(800, 600), "SFML works!");
+    sf::RenderWindow window(sf::VideoMode(800, 600), "Galmetry Sandobx");
 
     std::vector<Segment2D> segments = loadSegment2DFromFile("verify.txt");
     geometry::PlaneSweep planeSweep(segments);
@@ -119,7 +140,9 @@ int main() {
         planeSweep.calculate();
     };
 
-    ui::Label description("@2022", sf::Vector2f(25.f,525.f));
+    ui::Label description("Galmetry Sandobx 2022", sf::Vector2f(25.f,5.f));
+
+    geometry::Polygon2D polygon = randomPolygon2D(10, 100.f, 300.f);
 
     geometry::Point2D p;
     sf::Clock clock;
@@ -145,25 +168,39 @@ int main() {
                     if(event.key.code == sf::Keyboard::R) {
                         segments = randomVectorSegment2D(50, 0, GRID_WIDTH);
                         planeSweep.init(segments);
+                        points.clear();
+                    }
+
+                    if(event.key.code == sf::Keyboard::Enter) {
+                        polygon.vertices.clear(); 
+                        
                     }
                     
                 break;
             }
+            
+            if(sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+                auto posMouse = sf::Mouse::getPosition(window);
+                points.push_back(Point2D(posMouse.x, posMouse.y));
+                std::cout << "inserted Points" << std::endl;
+            }
+
         }
 
         window.clear(sf::Color::White);
         
         grid.render(window);
 
-        drawPoints(window, points, sf::Color::Black);
-        drawConvexHull(window, convexHullAlgo.convexHull);
-        drawSegments2D(window,segments);
+        drawPolygon(window,points);
+        //drawPoints(window, points, sf::Color::Black);
+        //drawConvexHull(window, convexHullAlgo.convexHull);
+        //drawSegments2D(window,segments);
 
-        drawPoints(window, planeSweep.intersectPoints, sf::Color::Red);
+        ///drawPoints(window, planeSweep.intersectPoints, sf::Color::Red);
         //planeSweep.drawIntersectionPoints(window);
-        drawHorizontalLine(window,planeSweep.eventPoint);
-        b.render(window);
-        b2.render(window);
+        //drawHorizontalLine(window,planeSweep.eventPoint);
+        //b.render(window);
+        //b2.render(window);
         description.render(window);
         window.display();
     }

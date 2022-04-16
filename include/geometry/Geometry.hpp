@@ -1,4 +1,11 @@
+//########################################
+// Project: Galmetry Sandbox
+// Author: Gallottino
+// Last modified: 16-04-2022
+//#########################################
+
 #pragma once
+
 #include <algorithm>
 #include <iostream>
 #include <list>
@@ -6,10 +13,11 @@
 #include <string>
 #include <sstream>
 
-
 namespace geometry{
 
     namespace Delta {
+        const float Delta1 = 0.1f;
+        const float Delta2 = 0.01f;
         const float Delta3 = 0.001f;
         const float Delta4 = 0.0001f;
         const float Delta5 = 0.00001f;
@@ -24,7 +32,16 @@ namespace geometry{
      * 
      * @details description
      * example:
-     * Point2D p(100.f,)
+     * Point2D p(100,20)
+     * 
+     * ^ y
+     * |
+     * |            
+     * |   
+     * |             . (100,20)
+     * |
+     * |--------------------> 
+     *                     x
      */
     class Point2D {
         public:
@@ -49,12 +66,13 @@ namespace geometry{
         static bool isLeft(Point2D a, Point2D b, Point2D c);
     };
 
-        /**
+    /**
      * @brief 
      * It rapresents a Segment in 2D space with a start and end Point.
+     * 
      * @details
-     * start point is the one with the y coordinates greatest
-     * end point is the other one
+     * start point is the one with the greatest y-coordinate.
+     * end point is the one with the smallest y-coordinate.
      */
     class Segment2D {
         public:
@@ -70,8 +88,8 @@ namespace geometry{
         bool operator!=(Segment2D s);
         bool operator<(const Segment2D p) const;
         bool operator>(const Segment2D p) const;
-        bool onSegment(Point2D p) const;
 
+        bool onSegment(Point2D p) const;
         bool containsPoint(Point2D p) const;
 
         static Point2D intersectSegment2D(Segment2D s1, Segment2D s2);
