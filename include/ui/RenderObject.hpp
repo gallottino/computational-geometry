@@ -1,4 +1,11 @@
+#pragma once
 #include <SFML/Graphics.hpp>
+
+namespace ui {
+        namespace Color {
+            static const sf::Color Grey = sf::Color(200.f,200.f,200.f);
+        }
+};
 
 class RenderObject {
     

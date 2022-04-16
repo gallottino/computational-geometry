@@ -1,4 +1,4 @@
-#include <geometry/Geometry.h>
+#include <geometry/Geometry.hpp>
 
 namespace geometry{
 Point2D::Point2D(double x, double y) : x(x), y(y) {
@@ -25,6 +25,7 @@ Point2D& Point2D::operator=(const Point2D& p) {
 bool Point2D::operator==(const Point2D p) const {
     return abs(x - p.x) < 0.0001f && abs(y - p.y) < 0.0001f;
 }
+
 
 bool Point2D::operator!=(const Point2D p) const {
     return x != p.x || y != p.y;

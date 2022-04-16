@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include <geometry/Geometry.h>
+#include <geometry/Geometry.hpp>
 #include <vector>
 namespace geometry {
 

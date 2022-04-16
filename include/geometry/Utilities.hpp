@@ -1,6 +1,6 @@
 #pragma once
 
-#include <geometry/Geometry.h>
+#include <geometry/Geometry.hpp>
 #include <ios>
 #include <fstream>
 #include <string>
@@ -42,6 +42,19 @@ namespace geometry {
         }
 
         return segments;
+    }
+
+    static std::set<Point2D> randomSetPoint2D(int size, double lower, double upper) {
+        std::set<Point2D> points;
+
+        double range = upper - lower;
+        for(int i = 0; i < size; i++) {
+            int x  = (rand() % (int) range) + lower;
+            int y  = (rand() % (int) range) + lower;
+            points.insert(Point2D(x,y));
+        }
+
+        return points;
     }
 
     static std::vector<Segment2D> randomVectorSegment2D(int size, double lower, double upper) {

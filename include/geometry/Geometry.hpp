@@ -6,10 +6,27 @@
 #include <string>
 #include <sstream>
 
+
 namespace geometry{
 
-    class Point2D
-    {
+    namespace Delta {
+        const float Delta3 = 0.001f;
+        const float Delta4 = 0.0001f;
+        const float Delta5 = 0.00001f;
+        const float Delta6 = 0.000001f;
+        const float Delta7 = 0.0000001f;
+    };
+
+    /**
+     * @brief 
+     * It rapresents a Point in 2D space with x and y coordinates.\\
+     * Istance of a Point2D without parameters is equal to null point
+     * 
+     * @details description
+     * example:
+     * Point2D p(100.f,)
+     */
+    class Point2D {
         public:
         double x;
         double y;
@@ -32,7 +49,14 @@ namespace geometry{
         static bool isLeft(Point2D a, Point2D b, Point2D c);
     };
 
-    class Segment2D{
+        /**
+     * @brief 
+     * It rapresents a Segment in 2D space with a start and end Point.
+     * @details
+     * start point is the one with the y coordinates greatest
+     * end point is the other one
+     */
+    class Segment2D {
         public:
         Point2D start;
         Point2D end;

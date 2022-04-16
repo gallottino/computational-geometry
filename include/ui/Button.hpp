@@ -1,7 +1,7 @@
 #pragma once
 #include <functional>
 #include <string>
-#include <SFML/Graphics.hpp>
+
 #include <ui/RenderObject.hpp>
 
 namespace ui {
@@ -17,5 +17,8 @@ namespace ui {
 
         private:
         std::string title;
+        sf::Color backgroundColor;
+        sf::Color outlineColor;
+        sf::Color textColor;
     };
 }

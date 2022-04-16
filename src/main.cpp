@@ -2,12 +2,15 @@
 #include <data_structures/avl.hpp>
 
 
-#include <geometry/Geometry.h>
+#include <geometry/Geometry.hpp>
 #include <geometry/ConvexHull.hpp>
 #include <geometry/PlaneSweep.hpp>
-#include <geometry/Utilities.h>
+#include <geometry/Utilities.hpp>
 
 #include <ui/Button.hpp>
+#include <ui/GeometryGrid.hpp>
+#include <ui/Label.hpp>
+
 #include <memory>
 #include <vector>
 
@@ -17,23 +20,6 @@ using namespace geometry;
 #define GRID_HEIGHT 600.f
 #define GRID_WIDTH 600.f
 
-void drawGrid(sf::RenderWindow& window) {
-    for(int i = 0; i * GRID_DIM <= GRID_HEIGHT; i++) {
-        sf::Vertex line[2];
-        line[0] = sf::Vertex(sf::Vector2f((float) i * GRID_DIM, 0.f));
-        line[1] = sf::Vertex(sf::Vector2f((float) i * GRID_DIM, GRID_HEIGHT));
-        line[0].color = sf::Color(200.f,200.f,200.f);
-        line[1].color = sf::Color(200.f,200.f,200.f);
-
-        window.draw(line, 2, sf::Lines);
-
-        line[0] = sf::Vertex(sf::Vector2f(0.f, (float) i * GRID_DIM));
-        line[1] = sf::Vertex(sf::Vector2f(GRID_HEIGHT,(float) i * GRID_DIM));
-        line[0].color = sf::Color(200.f,200.f,200.f);
-        line[1].color = sf::Color(200.f,200.f,200.f);
-        window.draw(line, 2, sf::Lines);
-    }
-}
 
 void drawPoint(sf::RenderWindow& window, Point2D p, sf::Color color) {
     float radius = 1.5f;
@@ -120,16 +106,20 @@ int main() {
     geometry::PlaneSweep planeSweep(segments);
     geometry::MonotoneConvexHull convexHullAlgo;
     
-    ui::Button b("Convex Hull", sf::Vector2f(600,0), sf::Vector2f(190,50));
 
+    ui::GeometryGrid grid(sf::Vector2f(25.f,25.f), sf::Vector2f(500.f,500.f));
+
+    ui::Button b("Convex Hull", sf::Vector2f(550.f,25.f), sf::Vector2f(190,50.f));
     b.onClick = [&] () {
         planeSweep.calculate();
     };
 
-    ui::Button b2("Plane Sweep", sf::Vector2f(600,52), sf::Vector2f(190,50));
+    ui::Button b2("Plane Sweep", sf::Vector2f(550.f,52+ 25.f), sf::Vector2f(190,50));
     b.onClick = [&] () {
         planeSweep.calculate();
     };
+
+    ui::Label description("@2022", sf::Vector2f(25.f,525.f));
 
     sf::Clock clock;
     while (window.isOpen())
@@ -161,11 +151,11 @@ int main() {
         }
 
         window.clear(sf::Color::White);
-        drawGrid(window);
-        drawPoints(window, points, sf::Color::Black);
+        
+        grid.render(window);
 
+        drawPoints(window, points, sf::Color::Black);
         drawConvexHull(window, convexHullAlgo.convexHull);
-    
         drawSegments2D(window,segments);
 
         drawPoints(window, planeSweep.intersectPoints, sf::Color::Red);
@@ -173,6 +163,7 @@ int main() {
         drawHorizontalLine(window,planeSweep.eventPoint);
         b.render(window);
         b2.render(window);
+        description.render(window);
         window.display();
     }
 

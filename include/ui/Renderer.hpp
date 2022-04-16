@@ -1,7 +1,7 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
-#include <geometry/Geometry.h>
+#include <geometry/Geometry.hpp>
 #include <functional>
 
 /*** 
@@ -10,19 +10,8 @@
 class Renderer {
 
     public:
-    Renderer(std::string title, int width, int height);
-    ~Renderer();
-
     //This method is overload with every geometry entity in the geometry library
-    void render(geometry::Point2D point);
-    void render(geometry::Point2D point, sf::Color color, float radius);
-    void render(geometry::Segment2D segment);
-
-    void clear();
-    bool isOpen();
-    void pollEvent(std::function<void(sf::Event)> eventManager);
-
-    private:
-    sf::RenderWindow* _window;
-    int _screen_width, _screen_height;
+    static void render(geometry::Point2D point);
+    static void render(geometry::Point2D point, sf::Color color, float radius);
+    static void render(geometry::Segment2D segment);
 };

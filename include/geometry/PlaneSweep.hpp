@@ -1,6 +1,6 @@
 #pragma once
 
-#include <geometry/Geometry.h>
+#include <geometry/Geometry.hpp>
 #include <set>
 #include <map>
 #include <vector>
@@ -23,7 +23,7 @@ namespace geometry {
             if(s1.segment == s2.segment) return false;
 
             auto comparePoint2D = [] (Point2D p1, Point2D p2) 
-                -> bool {return abs(p1.x - p2.x) < 0.0001f ? p1.y < p2.y : p1.x < p2.x;};
+                -> bool {return abs(p1.x - p2.x) < Delta::Delta6 ? p1.y < p2.y : p1.x < p2.x;};
 
             Point2D currentPoint = s1.eventPoint.y > s2.eventPoint.y ? s1.eventPoint : s2.eventPoint;
             if(s1.segment.end == currentPoint || s2.segment.end == currentPoint) return false;
