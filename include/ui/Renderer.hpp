@@ -11,6 +11,7 @@ class Renderer {
 
     public:
     Renderer(std::string title, int width, int height);
+    ~Renderer();
 
     //This method is overload with every geometry entity in the geometry library
     void render(geometry::Point2D point);

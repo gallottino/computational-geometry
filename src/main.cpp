@@ -6,6 +6,8 @@
 #include <geometry/ConvexHull.hpp>
 #include <geometry/PlaneSweep.hpp>
 #include <geometry/Utilities.h>
+
+#include <ui/Button.hpp>
 #include <memory>
 #include <vector>
 
@@ -117,6 +119,17 @@ int main() {
     std::vector<Segment2D> segments = loadSegment2DFromFile("verify.txt");
     geometry::PlaneSweep planeSweep(segments);
     geometry::MonotoneConvexHull convexHullAlgo;
+    
+    ui::Button b("Convex Hull", sf::Vector2f(600,0), sf::Vector2f(190,50));
+
+    b.onClick = [&] () {
+        planeSweep.calculate();
+    };
+
+    ui::Button b2("Plane Sweep", sf::Vector2f(600,52), sf::Vector2f(190,50));
+    b.onClick = [&] () {
+        planeSweep.calculate();
+    };
 
     sf::Clock clock;
     while (window.isOpen())
@@ -124,18 +137,13 @@ int main() {
         sf::Event event;
         while (window.pollEvent(event))
         {   
+            b.update(event,window);
             switch(event.type)
             {
                 case sf::Event::Closed:
                 window.close();
                 break;
-                
-                case sf::Event::MouseButtonPressed:
-                if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-                    sf::Vector2i position = sf::Mouse::getPosition(window);
-                    points.push_back(Point2D(position.x,position.y));
-                }
-                break;
+            
 
                 case::sf::Event::KeyPressed:
                     
@@ -147,14 +155,7 @@ int main() {
                         segments = randomVectorSegment2D(50, 0, GRID_WIDTH);
                         planeSweep.init(segments);
                     }
-
-                    if(event.key.code == sf::Keyboard::N) {
-                        planeSweep.calculate();
-                    }
-
-                    if(event.key.code == sf::Keyboard::S) {
-                        saveSegment2DonFile("verify.txt", segments);
-                    }
+                    
                 break;
             }
         }
@@ -164,18 +165,14 @@ int main() {
         drawPoints(window, points, sf::Color::Black);
 
         drawConvexHull(window, convexHullAlgo.convexHull);
-        
-        if(clock.getElapsedTime().asMilliseconds() > 100) {
-            planeSweep.calculate();
-            clock.restart();
-        } 
-        
+    
         drawSegments2D(window,segments);
 
         drawPoints(window, planeSweep.intersectPoints, sf::Color::Red);
         //planeSweep.drawIntersectionPoints(window);
         drawHorizontalLine(window,planeSweep.eventPoint);
-
+        b.render(window);
+        b2.render(window);
         window.display();
     }
 

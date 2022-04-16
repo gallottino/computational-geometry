@@ -6,6 +6,10 @@ Renderer::Renderer(std::string title, int width, int height) {
     _window = new sf::RenderWindow(sf::VideoMode(width, height), title);
 }
 
+Renderer::~Renderer() {
+    delete _window;
+}
+
 void Renderer::clear() {
     _window->clear();
 }
