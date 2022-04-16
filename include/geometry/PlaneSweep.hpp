@@ -33,18 +33,6 @@ namespace geometry {
             Point2D sweep_s1 = Segment2D::intersectSegment2D(s1.segment, sweepLine);
             Point2D sweep_s2 = Segment2D::intersectSegment2D(s2.segment, sweepLine);
 
-            if(sweep_s1.null_value) {
-
-                return false;
-                std::cout << "NULL VALUE" << s1.segment << ", " << currentPoint << "   point: " << sweep_s1 << std::endl;
-            }
-
-            if(sweep_s2.null_value) {
-                return true;
-                std::cout << "NULL VALUE" << s2.segment << ", " << currentPoint <<"   point: " << sweep_s2 <<  std::endl;
-            }
-
-
             return comparePoint2D(sweep_s1,sweep_s2);
         }
     };
@@ -86,7 +74,7 @@ namespace geometry {
         }
 
         void calculate() {  
-            if(queue.size() > 0){
+            while(queue.size() > 0){
                 eventPoint = *queue.begin(); queue.erase(eventPoint);
                 handleEventPoint(eventPoint);
                 lastEventPoint = eventPoint;
@@ -94,10 +82,6 @@ namespace geometry {
         }
             
         void handleEventPoint(Point2D event) {
-            for(Segment2D s : L[event]) {
-                StatusPlaneSweep toRemove(s, lastEventPoint);
-                status.erase(toRemove);
-            }
 
             for(Segment2D s : C[event]) {
                 StatusPlaneSweep toRemove(s, lastEventPoint);
@@ -114,53 +98,37 @@ namespace geometry {
                 status.insert(toInsert);
             }
 
-            std::cout << "-------------------------------------\nEvent Point : "<< event << std::endl;
-            std::cout << "Sweep Line Status: " << status.size() << std::endl;
-
-            for(StatusPlaneSweep s : status) {
-                std::cout << s.segment << std::endl;
-            }
-
-            std::cout << "\n";
             if(U[event].size() + C[event].size() == 0) {
                 if(status.size() < 2) return;
 
                 StatusPlaneSweep toRemove(L[event][0], lastEventPoint);
-                auto middle_ptr = status.lower_bound(toRemove);
-
-                auto right_middle = middle_ptr;
-                right_middle++;
-                Segment2D left = middle_ptr->segment;
-                Segment2D right = right_middle->segment;
-                if(right_middle == status.end()) {
-                    left = (--middle_ptr)->segment;
-                    right = (--right_middle)->segment;
-                }
                 
-                std::cout << "TEST AROUND A POINT: " << left << " with " << right << std::endl;
-                findNewEvent(middle_ptr->segment, right_middle->segment, event);
+                auto left = status.lower_bound(toRemove);
+                auto right = status.upper_bound(toRemove);
+
+                Segment2D left_seg = (--left)->segment;
+                Segment2D right_seg = right->segment;
+                findNewEvent(left->segment, right->segment, event);
+                status.erase(toRemove);
+                
             } else {
                 if(status.size() < 2) return;
     
                 Segment2D leftmost = U[event].size() == 0 ? C[event][0] : U[event][0];
-                std::cout << "To test" << leftmost << std::endl;
                 auto left_leftmost_ptr = status.find(StatusPlaneSweep(leftmost,event));
                 if(left_leftmost_ptr != status.begin()) {
                     left_leftmost_ptr--;
                     Segment2D left = left_leftmost_ptr->segment;
                     Segment2D right = leftmost;
-                    std::cout << "TEST LEFTMOST" << left << ", " << right << std::endl;
                     findNewEvent(left,right, event);
                 }
 
                 Segment2D rightmost = U[event].size() == 0 ? C[event][1] : U[event][0];
-                std::cout << "To test" << rightmost << std::endl;
                 auto right_rightmost_ptr = status.find(StatusPlaneSweep(rightmost,event));
                 right_rightmost_ptr++;
                 if(right_rightmost_ptr != status.end() ) {
                     Segment2D left = rightmost;
                     Segment2D right = right_rightmost_ptr->segment;
-                    std::cout << "TEST RIGHTMOST" << left << ", " << right << std::endl;
                     findNewEvent(left,right, event);
                 }
             }

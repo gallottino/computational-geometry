@@ -3,13 +3,9 @@ project(Computational_Geometry)
 
 set(CMAKE_CXX_STANDARD 14)
 
-set(SOURCE_FILES
-        src/main.cpp 
-)
-
-set(HEADER_FILES
-
-)
+file(GLOB ALGO_SOURCES src/algorithm/*.cpp)
+file(GLOB GEO_SOURCES src/geometry/*.cpp)
+file(GLOB UI_SOURCES src/ui/*.cpp)
 
 set(SFML_DIR "C:/development_tools/SFML-2.5.1/lib/cmake/SFML")
 set(SFML_INCLUDE_DIR "C:/development_tools/SFML-2.5.1/include/")
@@ -17,7 +13,7 @@ link_directories("C:/development_tools/SFML-2.5.1/lib/")
 
 
 set(YOUR_DIRECTORY "./")
-add_executable(Computational_Geometry ${SOURCE_FILES} ${HEADER_FILES})
+add_executable(Computational_Geometry src/main.cpp ${ALGO_SOURCES} ${GEO_SOURCES} ${UI_SOURCES} ${HEADER_FILES})
 target_include_directories(Computational_Geometry PRIVATE ${YOUR_DIRECTORY}/include/)
 
 
