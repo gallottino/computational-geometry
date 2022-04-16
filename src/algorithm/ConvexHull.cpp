@@ -1,6 +1,5 @@
 #include <geometry/ConvexHull.hpp>
 
-
 namespace geometry {
     MonotoneConvexHull::MonotoneConvexHull() {}
 
@@ -17,7 +16,7 @@ namespace geometry {
         std::sort(points.begin(), points.end(), comparePoint2D);
 
         convexHull.clear();
-        if(newPoints.size() < 3) {running = false; return;}
+        if(newPoints.size() < 3) { running = false; return; }
         convexHull.push_back(points[0]);
         convexHull.push_back(points[1]);
         running = true;
@@ -27,9 +26,8 @@ namespace geometry {
         int n_points = points.size();
         if(n_points< 3 || step < 0) {running = false; return;}
 
-
         int convexHullSize = convexHull.size();
-        while(convexHullSize > 1 && makeRightTurn(convexHull[convexHullSize - 2], convexHull[convexHullSize - 1] , points[step])) {
+        while(convexHullSize > 1 && Point2D::makeRightTurn(convexHull[convexHullSize - 2], convexHull[convexHullSize - 1] , points[step])) {
             convexHull.pop_back();
             convexHullSize = convexHull.size();
         }
@@ -43,9 +41,4 @@ namespace geometry {
         } 
         step += offset;
     }
-
-    bool MonotoneConvexHull::makeRightTurn( Point2D first, Point2D middle, Point2D last) {
-        return (middle.y - first.y) * (last.x - middle.x) - (middle.x - first.x) * (last.y - middle.y) > 0;
-    }
-
 };

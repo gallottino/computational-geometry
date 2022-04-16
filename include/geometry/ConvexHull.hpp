@@ -1,6 +1,4 @@
-        /***
-         * MonotoneConvexHull is described in Chapter 1 in the book "Computational Geometry" by Mark de Berg
-         **/
+
 
 #pragma once
 
@@ -8,6 +6,9 @@
 #include <vector>
 namespace geometry {
 
+    /***
+     * MonotoneConvexHull is described in Chapter 1 in the book "Computational Geometry" by Mark de Berg
+    ***/
     class MonotoneConvexHull {
         public:
         std::vector<Point2D> convexHull;
@@ -20,9 +21,9 @@ namespace geometry {
         bool makeRightTurn( Point2D first, Point2D middle, Point2D last);
 
         private: 
-            int step;
-            int offset;
-            bool running;
-            std::vector<Point2D> points;
+        int step;
+        int offset;
+        bool running;
+        std::vector<Point2D> points;
     };
 };
