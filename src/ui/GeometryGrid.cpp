@@ -25,10 +25,6 @@ namespace ui {
             line[1].color = ui::Color::Grey;
             window.draw(line, 2, sf::Lines);
         }
-
-        for(geometry::GeometryObject obj : _renderObjects) {
-            Renderer::render(obj);
-        }
     }
 
     void GeometryGrid::update(sf::Event evvent, sf::RenderWindow& window) {

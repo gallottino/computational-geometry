@@ -121,6 +121,7 @@ int main() {
 
     ui::Label description("@2022", sf::Vector2f(25.f,525.f));
 
+    geometry::Point2D p;
     sf::Clock clock;
     while (window.isOpen())
     {
