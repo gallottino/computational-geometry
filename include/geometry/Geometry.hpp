@@ -65,6 +65,7 @@ namespace geometry{
         static bool makeRightTurn( Point2D first, Point2D middle, Point2D last);
         static bool isLeft(Point2D a, Point2D b, Point2D c);
     };
+    typedef Point2D Vertex2D;
 
     /**
      * @brief 
@@ -94,4 +95,5 @@ namespace geometry{
 
         static Point2D intersectSegment2D(Segment2D s1, Segment2D s2);
     };
+    typedef Segment2D HalfEdge;
 }

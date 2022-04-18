@@ -1,10 +1,10 @@
 #include <SFML/Graphics.hpp>
 #include <data_structures/avl.hpp>
 
+#include <algorithm/ConvexHull.hpp>
+#include <algorithm/PlaneSweep.hpp>
 
 #include <geometry/Geometry.hpp>
-#include <geometry/ConvexHull.hpp>
-#include <geometry/PlaneSweep.hpp>
 #include <geometry/Utilities.hpp>
 
 #include <ui/Button.hpp>
@@ -19,7 +19,6 @@ using namespace geometry;
 #define GRID_DIM 20.f
 #define GRID_HEIGHT 600.f
 #define GRID_WIDTH 600.f
-
 
 void drawPoint(sf::RenderWindow& window, Point2D p, sf::Color color) {
     float radius = 1.5f;
@@ -98,11 +97,11 @@ void drawSegment2DCollision(sf::RenderWindow& window, std::vector<Segment2D> seg
     drawPoint(window, segments[0].intersectSegment2D(segments[0],segments[1]), sf::Color::Blue);
 }
 
-void drawPolygon(sf::RenderWindow& window, std::vector<Point2D> points) {
+void drawPolygon(sf::RenderWindow& window, Polygon2D polygon) {
     
     sf::Vertex line[2];
+    std::vector<Point2D> points = polygon.vertices;
     for(int i = 1; i < points.size(); i++) {
-        
         line[0] = sf::Vertex(sf::Vector2f(points[i - 1].x, points[i - 1].y));
         line[1] = sf::Vertex(sf::Vector2f(points[i].x, points[i].y));
         line[0].color = sf::Color::Black;
@@ -173,18 +172,15 @@ int main() {
 
                     if(event.key.code == sf::Keyboard::Enter) {
                         polygon.vertices.clear(); 
-                        
+                        polygon.vertices = points;
                     }
-                    
                 break;
             }
             
             if(sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
                 auto posMouse = sf::Mouse::getPosition(window);
                 points.push_back(Point2D(posMouse.x, posMouse.y));
-                std::cout << "inserted Points" << std::endl;
             }
-
         }
 
         window.clear(sf::Color::White);

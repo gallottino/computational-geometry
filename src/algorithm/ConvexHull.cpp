@@ -1,4 +1,4 @@
-#include <geometry/ConvexHull.hpp>
+#include <algorithm/ConvexHull.hpp>
 
 namespace geometry {
     MonotoneConvexHull::MonotoneConvexHull() {}
